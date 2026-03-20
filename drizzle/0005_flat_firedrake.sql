@@ -1,0 +1,1 @@
+ALTER TABLE "encrypted_votes" ADD COLUMN "e_id" serial PRIMARY KEY NOT NULL;

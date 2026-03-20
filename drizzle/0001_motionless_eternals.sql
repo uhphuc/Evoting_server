@@ -1,0 +1,1 @@
+ALTER TABLE "room_members" ADD COLUMN "is_voted" boolean DEFAULT false NOT NULL;
