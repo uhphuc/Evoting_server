@@ -17,7 +17,7 @@ import http from "http";
 const app = express();
 const server = http.createServer(app);
 
-import { initSocket } from "../socket.js";
+import { initSocket } from "./socket.js";
 
 
 
@@ -42,8 +42,9 @@ app.use("/announcements", announRoutes);
 const PORT = process.env.PORT || 3000;
 generateKeys().then(() => {
   
-    server.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-    });
     initSocket(server);
+    server.listen(PORT, () => {
+      console.log(`Server is running on http://0.0.0.0:${PORT}`);
+    });
+
   });

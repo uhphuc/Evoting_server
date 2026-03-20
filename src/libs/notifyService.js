@@ -1,7 +1,7 @@
 import { db } from "../database/drizzle.js";
 import { announcements } from "../models/announcements.js";
 import { announcementReceivers } from "../models/junctions.js";
-import { getIO } from "../../socket.js";
+import { getIO } from "../socket.js";
 
 export const sendAnnouncement = async ({
   type,

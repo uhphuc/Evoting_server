@@ -4,7 +4,10 @@ let io;
 
 export const initSocket = (server) => {
   io = new Server(server, {
-    cors: { origin: "*" },
+    cors: { 
+      origin: "*",
+      methods: ["GET", "POST", "PUT", "DELETE"],
+     },
   });
 
   io.use((socket, next) => {
