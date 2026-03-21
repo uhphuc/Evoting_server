@@ -208,6 +208,27 @@ export const getApprovedMembers = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 }
+export const checkApprovedByMemberId = async (req, res) => {
+    const { roomId, userId } = req.params;
+    try {
+        const membership = await db
+            .select()
+            .from(roomMembers)
+            .where(
+                and(
+                    eq(roomMembers.roomId, Number(roomId)),
+                    eq(roomMembers.userId, Number(userId))
+                )
+            );
+            
+        if (membership.length === 0) {
+            return res.status(404).json({ success: false, message: 'Membership not found' });
+        }
+        res.status(200).json({ success: true, isApproved: membership[0].isApproved });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+}
 // get room by member id that the member is approved in the room
 
 export const getRoomByMemberId = async (req, res) => {

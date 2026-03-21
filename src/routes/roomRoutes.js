@@ -12,5 +12,6 @@ router.get('/pending/:roomId', roomController.getPendingMembers);
 router.get('/approved/:roomId', roomController.getApprovedMembers);
 router.put('/approve', roomController.approveMember);
 router.get('/members/:memberId', roomController.getRoomByMemberId);
+router.get('/checkApproved/:roomId/:userId', roomController.checkApprovedByMemberId);
 
 export default router;
