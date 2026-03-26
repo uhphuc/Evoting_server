@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { generateRandomKeys, PublicKey, PrivateKey } from 'paillier-bigint';
 
-const KEY_FILE_PATH = path.resolve('keys.json');
+const KEY_FILE_PATH = path.resolve('./src/keys.json');
 
 let publicKey = null;
 let privateKey = null;
