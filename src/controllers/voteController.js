@@ -60,7 +60,10 @@ export const getTotalVotes = async (req, res) => {
             // Optionally, update options.sum:
             await db.update(options).set({ sum: Number(decrypted) }).where(eq(options.id, opt.id));
         }
-        
+        io.to(`room_${roomId}`).emit("vote_results_updated", {
+            results,
+        });
+    
 
         return res.status(200).json({ success: true, results });
     } catch (error) {
