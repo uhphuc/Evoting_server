@@ -8,28 +8,40 @@ import jwt from 'jsonwebtoken';
 export const authController = {
   async register(req, res) {
     const { email, name, phone, gender, birthDate, address, password, role } = req.body;
+    console.log(req.body);
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      if (!userRoleEnum.values.includes(role)) {
+      if (!userRoleEnum.enumValues.includes(role)) {
         return res.status(400).json({ success: false, message: 'Invalid role' });
       }
-      if (!userGenderEnum.values.includes(gender)) {
-        return res.status(400).json({ success: false, message: 'Invalid'});
+      if (!userGenderEnum.enumValues.includes(gender)) {
+        return res.status(400).json({ success: false, message: 'Invalid gender' });
       }
       const newUser = await db.insert(users).values({
         email,
         name,
         phone, 
         gender,
-        birthDate,
+        birthDate: new Date(birthDate),
         address,
         password: hashedPassword,
         role
       }).returning();
-      res.status(201).json({ success: true, user: newUser });
+      res.status(200).json({ success: true, user: { 
+        id: newUser[0].id, 
+        email: newUser[0].email, 
+        name: newUser[0].name, 
+        role: newUser[0].role,
+        phone: newUser[0].phone,
+        gender: newUser[0].gender,
+        birthDate: newUser[0].birthDate,
+        address: newUser[0].address,
+        createdAt: newUser[0].createdAt,
+        updatedAt: newUser[0].updatedAt
+       } });
     }
     catch (error) {
-      if (error.code === '23505') { // Unique violation
+      if (error.code === '23505') { 
         return res.status(409).json({ success: false, message: 'Email already exists' });
       }
       res.status(500).json({ success: false, error: error.message });

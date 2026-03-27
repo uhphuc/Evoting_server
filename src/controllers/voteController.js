@@ -4,6 +4,8 @@ import { options } from "../models/options.js";
 import { encryptedVotes } from "../models/votes.js";
 import { eq, and } from "drizzle-orm";
 import { getPrivateKey, getPublicKey } from "../libs/paillierKeys.js";
+import { getIO } from "../socket.js";
+
 
 export const postVote = async (req, res) => {
   const { roomId, optionId, encryptedVote } = req.body;
@@ -31,6 +33,7 @@ export const getTotalVotes = async (req, res) => {
     const { roomId } = req.params;
     const privateKey = getPrivateKey();
     const publicKey = getPublicKey();
+    const io = getIO();
 
     try {
         const opts = await db.select().from(options).where(eq(options.roomId, roomId));
