@@ -7,27 +7,99 @@ import { getPrivateKey, getPublicKey } from "../libs/paillierKeys.js";
 import { getIO } from "../socket.js";
 
 
-export const postVote = async (req, res) => {
-  const { roomId, optionId, encryptedVote } = req.body;
+export const postVotes = async (req, res) => {
+  const { roomId, votes } = req.body; 
+  const userId = req.user.id;
 
   try {
     const room = await db.select().from(rooms).where(eq(rooms.id, roomId));
-    if (room.length === 0) return res.status(404).json({ success: false, message: 'Room not found' });
+    if (room.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Room not found",
+      });
+    }
 
-    const option = await db.select().from(options).where(eq(options.id, optionId));
-    if (option.length === 0) return res.status(404).json({ success: false, message: 'Option not found' });
+    const existingVote = await db
+      .select()
+      .from(encryptedVotes)
+      .where(
+        and(
+          eq(encryptedVotes.roomId, roomId),
+          eq(encryptedVotes.userId, userId)
+        )
+      );
 
-    await db.insert(encryptedVotes).values({
+    if (existingVote.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "You already voted",
+      });
+    }
+
+    const roomOptions = await db
+      .select()
+      .from(options)
+      .where(eq(options.roomId, roomId))
+      .orderBy(options.id);
+
+    if (roomOptions.length !== votes.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Votes vector length mismatch",
+      });
+    }
+
+    const insertData = roomOptions.map((opt, index) => ({
       roomId,
-      optionId,
-      encryptedData: encryptedVote,
+      optionId: opt.id,
+      userId,
+      encryptedData: votes[index],
+    }));
+
+    await db.insert(encryptedVotes).values(insertData);
+
+    return res.status(200).json({
+      success: true,
+      message: "Vector vote recorded",
     });
 
-    return res.status(200).json({ success: true, message: 'Encrypted vote recorded' });
   } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
+    console.error("Vote error:", error);
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
+
+export const hasVoted = async (req, res) => {
+    const { roomId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        const existingVote = await db
+            .select()
+            .from(encryptedVotes)
+            .where(
+                and(
+                    eq(encryptedVotes.roomId, roomId),
+                    eq(encryptedVotes.userId, userId)
+                )
+            );
+            
+        return res.status(200).json({
+            success: true,
+            hasVoted: existingVote.length > 0
+        });
+    } catch (error) {
+        console.error("Check vote error:", error);
+        return res.status(500).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
 
 export const getTotalVotes = async (req, res) => {
     const { roomId } = req.params;
